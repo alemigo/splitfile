@@ -14,6 +14,7 @@ with splitfile.open('data.bin', 'wb') as f:
 ```
 import splitfile
 import tarfile
+
 with splitfile.open('data.bin', 'wb', volume_size=1000000, compression=True, 
                    lzma_preset=9, aes_key=b'encryption-key') as f:
     with tarfile.open(mode='w|', fileobj=f) as t:
