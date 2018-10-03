@@ -2,7 +2,7 @@
 
 Python file-like object that facilitates reading and writing of binary data split across multiple volumes (files) of a specified size. Includes support for compression and encryption.  Sequential read/write methods only.
 
-Can be used with modules such as tarfile, enabling read/write from/to compressed, encrypted, and split tar archives (use 'w|' and 'r|' tarfile stream modes).
+Can be used with modules such as tarfile, enabling read/write of compressed, encrypted, and split tar archives (use 'w|' and 'r|' tarfile stream modes).
 
 ### Example
 ```
