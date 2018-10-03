@@ -15,8 +15,6 @@ __author__ = 'github.com/alemigo'
 from builtins import open as python_open
 import os
 import io
-import lzma
-from Crypto.Cipher import AES
 
 # from splitfile import *
 __all__ = ['SplitFile', 'open']
@@ -44,9 +42,11 @@ class SplitFile(object):
         """Initialize splitfile object"""
         self.file_name = filename
         self.mode = mode
-        self.aes_key = aes_key
         self.file_index = 0
         self.first_io = True
+
+        self.aes_key = aes_key
+        if aes_key: from Crypto.Cipher import AES
 
         if volume_size < 0: raise ValueError('Volume size must be positive or zero')
         self.volume_size = volume_size
@@ -56,6 +56,7 @@ class SplitFile(object):
 
         self.compression = compression
         if compression:
+            import lzma
             if mode == 'wb':
                 self.lzma_obj = lzma.LZMACompressor(preset=lzma_preset)
             else:
