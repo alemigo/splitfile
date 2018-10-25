@@ -8,7 +8,7 @@
    size. Includes support for compression and encryption.
 """
 
-version = '1.1.0'
+__version__ = '1.1.0'
 __author__ = 'github.com/alemigo'
 
 # Imports
