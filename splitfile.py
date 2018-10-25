@@ -16,7 +16,6 @@ from builtins import open as python_open
 import os
 import io
 import lzma
-from Crypto.Cipher import AES
 
 # from splitfile import *
 __all__ = ['SplitFile', 'open']
@@ -123,6 +122,7 @@ class SplitFile(object):
         if self.first_io:  # first write to first volume
             self.first_io = False
             if self.aes_key:  # write encryption header if needed
+                from Crypto.Cipher import AES
                 self.cipher = AES.new(self.aes_key, AES.MODE_CTR)
                 self.file.write(self.cipher.nonce)
 
@@ -167,6 +167,7 @@ class SplitFile(object):
         if self.first_io:  # first read from first volume
             self.first_io = False
             if self.aes_key:  # read encryption header
+                from Crypto.Cipher import AES
                 nonce = self.file.read(8)
                 self.cipher = AES.new(self.aes_key, AES.MODE_CTR, nonce=nonce)
 
