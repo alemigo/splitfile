@@ -255,7 +255,8 @@ class SplitFile(object):
 
     def close(self):
         """close file implementation"""
-        if self.mode == 'wb' and self.compression and self.file:
+        if (self.mode == 'wb' and self.compression and self.file and
+                not self.first_io):
             # flush compression
             data = self.lzma_obj.flush()
             if self.aes_key: data = self.cipher.encrypt(data)
