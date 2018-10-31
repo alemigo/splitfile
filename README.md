@@ -30,3 +30,7 @@ data.bin.3
 ### Dependencies
 
 PyCryptodome for AES
+
+### Installation
+
+pip install splitfile

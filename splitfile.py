@@ -16,6 +16,7 @@ from builtins import open as python_open
 import os
 import io
 import lzma
+# from Crypto.Cipher import AES => conditional import
 
 # from splitfile import *
 __all__ = ['SplitFile', 'open']
