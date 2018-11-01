@@ -24,7 +24,7 @@ def find_version(*file_paths):
 
 setuptools.setup(
     name="splitfile",
-    version=find_version("splitfile.py"),
+    version=find_version("splitfile","__init__.py"),
     author="github.com/alemigo",
     description="File like object that splits data across volumes",
     long_description=long_description,
