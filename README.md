@@ -1,8 +1,8 @@
 # splitfile
 
-Python file-like object that facilitates reading and writing of binary data split across multiple volumes (files) of a specified size. Includes support for compression and encryption.  Sequential read/write methods only.
+Python file-like object that facilitates reading and writing of binary data split across multiple volumes (files) of a specified size.  Supports random access IO.
 
-Can be used with modules such as tarfile, enabling read/write of compressed, encrypted, and split tar archives (use 'w|' and 'r|' tarfile stream modes).
+Can be used with modules such as tarfile, zipfile, lzma, etc. enabling read/write of split archives.
 
 ### Examples
 ```
@@ -15,9 +15,8 @@ with splitfile.open('data.bin', 'wb') as f:
 import splitfile
 import tarfile
 
-with splitfile.open('data.bin', 'wb', volume_size=1000000, compression=True, 
-                   lzma_preset=9, aes_key=b'encryption-key') as f:
-    with tarfile.open(mode='w|', fileobj=f) as t:
+with splitfile.open('data.bin', 'wb', volume_size=1000000) as f:
+    with tarfile.open(mode='w', fileobj=f) as t:
         for file in files:
             t.add(file)
      
@@ -29,7 +28,7 @@ data.bin.3
 ```
 ### Dependencies
 
-PyCryptodome for AES
+Standard library only
 
 ### Installation
 
