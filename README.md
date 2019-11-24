@@ -4,6 +4,10 @@ Python file-like object that facilitates reading and writing of binary data spli
 
 Can be used with modules such as tarfile, zipfile, lzma, etc. enabling read/write of split archives.
 
+Note: Version 2.0 removes previously integrated encryption and compression options.  The
+breadth of choice across both suggests they are better employed as a separate layer,
+leaving splitfile to simply manage the final IO across volumes.
+
 ### Examples
 ```
 import splitfile
