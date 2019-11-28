@@ -46,8 +46,8 @@ class SplitFile(object):
         """Initialize splitfile object"""
 
         # validate parameters
-        if mode not in ["rb", "wb", "rb+", "wb+"]:
-            raise ValueError("Supported modes: rb, wb, rb+ and wb+")
+        if mode not in ["rb", "wb", "rb+", "wb+", "ab", "ab+"]:
+            raise ValueError("Supported modes: rb, wb, ab, rb+, wb+, ab+")
 
         if volume_size < 0:
             raise ValueError("Volume size must be positive or zero")
@@ -73,7 +73,7 @@ class SplitFile(object):
         total_size = 0
         self.volumes = [{"volume_size": 0, "total_size": 0}]
         while os.path.exists(self.file_name + suff):
-            if "rb" in mode:
+            if "rb" in mode or "ab" in mode:
                 file_size = os.stat(self.file_name + suff).st_size
                 total_size += file_size
                 self.volumes.append(
@@ -98,14 +98,18 @@ class SplitFile(object):
 
         # open first file
         if not self._next_file():
-            if "rb" in mode:  # rb or rb+
+            if "rb" in mode:
                 raise FileNotFoundError("File not found")
-            else:  # wb or wb+
+            else:  # wb or wb+ or ab or ab+
                 raise OSError("Invalid filename")
+
+        # seek to end for append mode
+        if "ab" in self.mode:
+            self.seek(0, 2)
 
     def write(self, data):
         """write method implementation"""
-        if self.mode != "wb" and "+" not in self.mode:
+        if self.mode not in ["wb", "ab"] and "+" not in self.mode:
             raise io.UnsupportedOperation("Cannot write in read mode")
 
         if self.closed:
@@ -202,7 +206,7 @@ class SplitFile(object):
 
         if offset < 0:
             raise ValueError("Negative seek position")
-        if offset > self.volumes[-1]["total_size"]:
+        elif offset >= self.volumes[-1]["total_size"]:
             self.EOF = True
             self.total_pos = offset
             return offset
@@ -306,7 +310,7 @@ class SplitFile(object):
     def readable(self):
         if self.closed:
             raise ValueError("I/O operation on closed file.")
-        if "rb" in self.mode or "+" in self.mode:
+        elif "rb" in self.mode or "+" in self.mode:
             return True
         else:
             return False
@@ -314,7 +318,7 @@ class SplitFile(object):
     def writable(self):
         if self.closed:
             raise ValueError("I/O operation on closed file.")
-        if "wb" in self.mode or "+" in self.mode:
+        elif self.mode in ["wb", "ab"] or "+" in self.mode:
             return True
         else:
             return False
@@ -322,15 +326,14 @@ class SplitFile(object):
     def seekable(self):
         if self.closed:
             raise ValueError("I/O operation on closed file.")
-        if "+" in self.mode:
-            return True
         else:
-            return False
+            return self.file.seekable()
 
     def flush(self):
         if self.closed:
             raise ValueError("I/O operation on closed file.")
-        self.file.flush()
+        else:
+            self.file.flush()
 
     @property
     def closed(self):
@@ -340,7 +343,8 @@ class SplitFile(object):
     def size(self):
         if self.closed:
             raise ValueError("I/O operation on closed file.")
-        return self.volumes[-1]["total_size"]
+        else:
+            return self.volumes[-1]["total_size"]
 
     def __enter__(self):
         return self
@@ -384,11 +388,14 @@ class SplitFile(object):
         if (
             self.last_io == "w"
             or ("wb" in self.mode and self.last_io != "r")
+            or ("ab" in self.mode and self.last_io != "r")
             or path_exists
         ):
             if self.mode == "rb+" and self.last_io == "w" and not path_exists:
                 mode = "wb+"  # new volume file
-            elif "wb" in self.mode and path_exists:
+            elif ("wb" in self.mode and path_exists) or (
+                "ab" in self.mode and path_exists
+            ):
                 mode = "rb+"  # open existing volume file
             else:
                 mode = self.mode
@@ -427,9 +434,13 @@ class SplitFile(object):
     def _write(self, data):
         """write bytes data to file, advance to next volume if needed"""
         if self.volume_size == 0:  # for volume_size =0, do not split to volumes
-            self.file_pos += len(data)
-            self.total_pos += len(data)
-            return self.file.write(data)
+            bytes_written = self.file.write(data)
+            self.file_pos += bytes_written
+            self.total_pos += bytes_written
+            self.volumes[self.file_index]["total_size"] = max(
+                self.total_pos, self.volumes[self.file_index]["total_size"]
+            )
+            return bytes_written
 
         # is position is beyond current size of the file, truncate to extend
         if self.total_pos > self.volumes[-1]["total_size"]:
