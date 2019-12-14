@@ -8,7 +8,7 @@
    size.  Supports random access IO.
 """
 
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 __author__ = "github.com/alemigo"
 
 # Imports
@@ -40,7 +40,7 @@ class SplitFile(object):
     last_io = None  # Type of last IO performed (read vs write)
     EOF = False  # End of all volumes reached for read operation
     file_closed = None  # Boolean is file has been closed
-    BLOCKSIZE = io.DEFAULT_BUFFER_SIZE  # Size of read blocks
+    BLOCKSIZE = 64 * 1024  # Size of read blocks
 
     def __init__(self, filename, mode, volume_size=0, append_to_partial=True):
         """Initialize splitfile object"""
@@ -487,11 +487,11 @@ class SplitFile(object):
         return output
 
     def _read_file(self, size=-1):
-        """read1 block from file, advance to next volume if needed"""
+        """read block from file, advance to next volume if needed"""
         if size == -1:
             size = self.BLOCKSIZE
         while True:
-            data = self.file.read1(size)
+            data = self.file.read(size)
             if not data:
                 if self._next_file():
                     continue

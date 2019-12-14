@@ -30,9 +30,20 @@ data.bin.2
 data.bin.3
 ...
 ```
+### Documentation
+
+splitfile.**open**(*filename, mode, volume_size=0, append_to_partial=True*)
+
+Returns a SplitFile object.
+
+ - *filename* contains a valid file path.  Volumes add a suffix (.2, .3, etc.).
+ - Supported *mode* values are `wb, wb+, ab, ab+, rb, rb+`.
+ - *volume_size* specifies the max size of a volume in bytes.
+ - *append_to_partial* set to True appends data written to the end of a previously created file by adding to the last volume if its size is less than *volume_size*.  If False, a new volume is always created for writing beyond the end of an existing file.
+
 ### Dependencies
 
-Standard library only
+None
 
 ### Installation
 
